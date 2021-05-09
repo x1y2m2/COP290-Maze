@@ -138,6 +138,9 @@ int main( int argc, char* args[] )
 			
 			bool bg = false;
 			bool yg = false;
+			
+			int bdir = 1;
+			int ydir = 3;
 						
 			//Main loop flag
 			bool quit = false;
@@ -160,7 +163,7 @@ int main( int argc, char* args[] )
 					{
 						switch(e.key.keysym.sym)
 						{
-							case SDLK_UP:
+							case SDLK_w:
 							if(!maze[yblue][xblue-1]){
 								pBlue;
 								SDL_Rect rct = {12*(yblue),12*(xblue-1),12,12};
@@ -170,9 +173,10 @@ int main( int argc, char* args[] )
 								SDL_RenderFillRect(gRenderer,&rct);
 								xblue--;
 							}
+							bdir = 4;
 							break;
 							
-							case SDLK_DOWN:
+							case SDLK_s:
 							if(!maze[yblue][xblue+1]){
 								pBlue;
 								SDL_Rect rct = {12*(yblue),12*(xblue+1),12,12};
@@ -182,9 +186,10 @@ int main( int argc, char* args[] )
 								SDL_RenderFillRect(gRenderer,&rct);
 								xblue++;
 							}
+							bdir = 2;
 							break;
 							
-							case SDLK_LEFT:
+							case SDLK_a:
 							if(!maze[yblue-1][xblue]){
 								pBlue;
 								SDL_Rect rct = {12*(yblue-1),12*(xblue),12,12};
@@ -194,9 +199,10 @@ int main( int argc, char* args[] )
 								SDL_RenderFillRect(gRenderer,&rct);
 								yblue--;
 							}
+							bdir = 3;
 							break;
 							
-							case SDLK_RIGHT:
+							case SDLK_d:
 							if(!maze[yblue+1][xblue]){
 								pBlue;
 								SDL_Rect rct = {12*(yblue+1),12*(xblue),12,12};
@@ -205,6 +211,99 @@ int main( int argc, char* args[] )
 								rct = {12*yblue,12*xblue,12,12};
 								SDL_RenderFillRect(gRenderer,&rct);
 								yblue++;
+							}
+							bdir = 1;
+							break;
+							
+							case SDLK_r:
+							if(ccheck(xblue,yblue,xyellow,yyellow,bdir,maze)){
+								WHITE;
+								SDL_Rect rct = {12*yyellow,12*xyellow,12,12};
+								SDL_RenderFillRect(gRenderer,&rct);
+								if(bg){
+									bwin();
+									quit = true;
+									SDL_Delay(10000);
+								}else{
+									pYellow;
+									rct = {12*byellow,12*ayellow,12,12};
+									SDL_RenderFillRect(gRenderer,&rct);
+									xyellow = ayellow;
+									yyellow = byellow;
+								}
+							}
+							break;
+							
+//----------------------------------------------------------------//
+							
+							case SDLK_UP:
+							if(!maze[yyellow][xyellow-1]){
+								pYellow;
+								SDL_Rect rct = {12*(yyellow),12*(xyellow-1),12,12};
+								SDL_RenderFillRect(gRenderer,&rct);
+								WHITE;
+								rct = {12*yyellow,12*xyellow,12,12};
+								SDL_RenderFillRect(gRenderer,&rct);
+								xyellow--;
+							}
+							ydir = 4;
+							break;
+							
+							case SDLK_DOWN:
+							if(!maze[yyellow][xyellow+1]){
+								pYellow;
+								SDL_Rect rct = {12*(yyellow),12*(xyellow+1),12,12};
+								SDL_RenderFillRect(gRenderer,&rct);
+								WHITE;
+								rct = {12*yyellow,12*xyellow,12,12};
+								SDL_RenderFillRect(gRenderer,&rct);
+								xyellow++;
+							}
+							ydir = 2;
+							break;
+							
+							case SDLK_LEFT:
+							if(!maze[yyellow-1][xyellow]){
+								pYellow;
+								SDL_Rect rct = {12*(yyellow-1),12*(xyellow),12,12};
+								SDL_RenderFillRect(gRenderer,&rct);
+								WHITE;
+								rct = {12*yyellow,12*xyellow,12,12};
+								SDL_RenderFillRect(gRenderer,&rct);
+								yyellow--;
+							}
+							ydir = 3;
+							break;
+							
+							case SDLK_RIGHT:
+							if(!maze[yyellow+1][xyellow]){
+								pYellow;
+								SDL_Rect rct = {12*(yyellow+1),12*(xyellow),12,12};
+								SDL_RenderFillRect(gRenderer,&rct);
+								WHITE;
+								rct = {12*yyellow,12*xyellow,12,12};
+								SDL_RenderFillRect(gRenderer,&rct);
+								yyellow++;
+							}
+							ydir = 1;
+							break;
+							
+							case SDLK_SPACE:
+							if(ccheck(xyellow,yyellow,xblue,yblue,ydir,maze)){
+								WHITE;
+								SDL_Rect rct = {12*yblue,12*xblue,12,12};
+								SDL_RenderFillRect(gRenderer,&rct);
+								if(yg){
+									ywin();
+									quit = true;
+									SDL_Delay(10000);
+								}else{
+									pBlue;
+									rct = {12*bblue,12*ablue,12,12};
+									SDL_RenderFillRect(gRenderer,&rct);
+									xblue = ablue;
+									yblue = bblue;
+								}
 							}
 							break;
 							
@@ -270,7 +369,7 @@ void maze_setup(bool** maze){
 	byellow = y;
 }
 
-bool xcheck(int x, int y1, int y2){
+bool xcheck(int x, int y1, int y2, bool** maze){
 	for(int i=y1+1;i<y2;i++){
 		if(maze[i][x]){
 			return false;
@@ -279,7 +378,7 @@ bool xcheck(int x, int y1, int y2){
 	return true;
 }
 
-bool ycheck(int x1, int x2, int y){
+bool ycheck(int x1, int x2, int y, bool** maze){
 	for(int i=x1+1;i<x2;i++){
 		if(maze[y][i]){
 			return false;
@@ -288,15 +387,27 @@ bool ycheck(int x1, int x2, int y){
 	return true;
 }
 
-bool ccheck(int x1, int y1, int x2, int y2, int x){
+bool ccheck(int x1, int y1, int x2, int y2, int x, bool** maze){
 	if(x==1){
-		return (y1==y2) && (x1<x2) && ycheck(x1,x2,y1);
+		return (y1==y2) && (x1<x2) && ycheck(x1,x2,y1,maze);
 	}else if(x==2){
-		return (x1==x2) && (y1<y2) && xcheck(x1,y1,y2);
+		return (x1==x2) && (y1<y2) && xcheck(x1,y1,y2,maze);
 	}else if(x==3){
-		return (y1==y2) && (x1>x2) && ycheck(x2,x1,y1);
+		return (y1==y2) && (x1>x2) && ycheck(x2,x1,y1,maze);
 	}else if(x==4){
-		return (x1==x2) && (y1>y2) && xcheck(x1,y2,y1);
+		return (x1==x2) && (y1>y2) && xcheck(x1,y2,y1,maze);
 	}
-	else(return false;)
+	else{return false;}
+}
+
+void bwin(){
+	SDL_Rect rct = {0,0,SCREEN_WIDTH,SCREEN_HEIGHT};
+	pBlue;
+	SDL_RenderFillRect(gRenderer,&rct);
+}
+
+void ywin(){
+	SDL_Rect rct = {0,0,SCREEN_WIDTH, SCREEN_HEIGHT};
+	pYellow;
+	SDL_RenderFillRect(gRenderer,&rct);
 }
