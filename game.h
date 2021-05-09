@@ -10,3 +10,5 @@ void maze_setup(bool** maze);
 
 //Frees media and shuts down SDL
 void close();
+
+bool entry();
