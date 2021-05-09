@@ -133,9 +133,11 @@ int main( int argc, char* args[] )
 		}
 		else
 		{	
-			bool pl = entry();
 			bool** maze = setup();
 			maze_setup(maze);
+			
+			bool bg = false;
+			bool yg = false;
 						
 			//Main loop flag
 			bool quit = false;
@@ -156,80 +158,64 @@ int main( int argc, char* args[] )
 					}
 					else if(e.type == SDL_KEYDOWN)
 					{
-						int s,t;
-						if(pl){
-							pBlue;
-							s = xblue;
-							t = yblue;
-						}else{
-							pYellow;
-							s = xyellow;
-							t = yyellow;
-						}
 						switch(e.key.keysym.sym)
 						{
 							case SDLK_UP:
-							if(!maze[t][s-1]){
-								SDL_Rect rct = {12*(t),12*(s-1),12,12};
+							if(!maze[yblue][xblue-1]){
+								pBlue;
+								SDL_Rect rct = {12*(yblue),12*(xblue-1),12,12};
 								SDL_RenderFillRect(gRenderer,&rct);
 								WHITE;
-								rct = {12*t,12*s,12,12};
-								if(pl){
-									xblue--;
-								}else{
-									xyellow--;
-								}
+								rct = {12*yblue,12*xblue,12,12};
 								SDL_RenderFillRect(gRenderer,&rct);
+								xblue--;
 							}
 							break;
 							
 							case SDLK_DOWN:
-							if(!maze[t][s+1]){
-								SDL_Rect rct = {12*(t),12*(s+1),12,12};
+							if(!maze[yblue][xblue+1]){
+								pBlue;
+								SDL_Rect rct = {12*(yblue),12*(xblue+1),12,12};
 								SDL_RenderFillRect(gRenderer,&rct);
 								WHITE;
-								rct = {12*t,12*s,12,12};
+								rct = {12*yblue,12*xblue,12,12};
 								SDL_RenderFillRect(gRenderer,&rct);
-								if(pl){
-									xblue++;
-								}else{
-									xyellow++;
-								}
+								xblue++;
 							}
 							break;
 							
 							case SDLK_LEFT:
-							if(!maze[t-1][s]){
-								SDL_Rect rct = {12*(t-1),12*(s),12,12};
+							if(!maze[yblue-1][xblue]){
+								pBlue;
+								SDL_Rect rct = {12*(yblue-1),12*(xblue),12,12};
 								SDL_RenderFillRect(gRenderer,&rct);
 								WHITE;
-								rct = {12*t,12*s,12,12};
+								rct = {12*yblue,12*xblue,12,12};
 								SDL_RenderFillRect(gRenderer,&rct);
-								if(pl){
-									yblue--;
-								}else{
-									yyellow--;
-								}
+								yblue--;
 							}
 							break;
 							
 							case SDLK_RIGHT:
-							if(!maze[t+1][s]){
-								SDL_Rect rct = {12*(t+1),12*(s),12,12};
+							if(!maze[yblue+1][xblue]){
+								pBlue;
+								SDL_Rect rct = {12*(yblue+1),12*(xblue),12,12};
 								SDL_RenderFillRect(gRenderer,&rct);
 								WHITE;
-								rct = {12*t,12*s,12,12};
+								rct = {12*yblue,12*xblue,12,12};
 								SDL_RenderFillRect(gRenderer,&rct);
-								if(pl){
-									yblue++;
-								}else{
-									yyellow++;
-								}
+								yblue++;
 							}
 							break;
 							
 							default:
 							break;
+						}
+						if(xblue==ayellow && yblue==byellow){
+							bg=true;
+						}
+						if(xyellow==ablue && yyellow==bblue){
+							yg=true;
 						}
 						SDL_RenderPresent(gRenderer);
 					}
@@ -284,27 +270,33 @@ void maze_setup(bool** maze){
 	byellow = y;
 }
 
-bool entry(){
-	pBlue;
-	SDL_Rect rct = {0,0,SCREEN_WIDTH,SCREEN_HEIGHT};
-	SDL_RenderFillRect(gRenderer, &rct);
-	pYellow;
-	rct = {0,SCREEN_HEIGHT/2,SCREEN_WIDTH,SCREEN_HEIGHT};
-	SDL_RenderFillRect(gRenderer, &rct);
-	SDL_RenderPresent(gRenderer);
-	bool quit = false;
-	SDL_Event e;
-	int x,y;
-	bool check;
-	while(!quit){
-		while(SDL_PollEvent(&e) != 0){
-			if(e.type == SDL_MOUSEBUTTONDOWN){
-				SDL_GetMouseState(&x,&y);
-				quit = true;
-				if(y<SCREEN_HEIGHT/2){check=true;}
-				else{check=false;}
-			}
+bool xcheck(int x, int y1, int y2){
+	for(int i=y1+1;i<y2;i++){
+		if(maze[i][x]){
+			return false;
 		}
 	}
-	return check;
+	return true;
+}
+
+bool ycheck(int x1, int x2, int y){
+	for(int i=x1+1;i<x2;i++){
+		if(maze[y][i]){
+			return false;
+		}
+	}
+	return true;
+}
+
+bool ccheck(int x1, int y1, int x2, int y2, int x){
+	if(x==1){
+		return (y1==y2) && (x1<x2) && ycheck(x1,x2,y1);
+	}else if(x==2){
+		return (x1==x2) && (y1<y2) && xcheck(x1,y1,y2);
+	}else if(x==3){
+		return (y1==y2) && (x1>x2) && ycheck(x2,x1,y1);
+	}else if(x==4){
+		return (x1==x2) && (y1>y2) && xcheck(x1,y2,y1);
+	}
+	else(return false;)
 }
