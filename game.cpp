@@ -133,6 +133,7 @@ int main( int argc, char* args[] )
 		}
 		else
 		{	
+			bool pl = entry();
 			bool** maze = setup();
 			maze_setup(maze);
 						
@@ -155,53 +156,75 @@ int main( int argc, char* args[] )
 					}
 					else if(e.type == SDL_KEYDOWN)
 					{
+						int s,t;
+						if(pl){
+							pBlue;
+							s = xblue;
+							t = yblue;
+						}else{
+							pYellow;
+							s = xyellow;
+							t = yyellow;
+						}
 						switch(e.key.keysym.sym)
 						{
 							case SDLK_UP:
-							if(!maze[yblue][xblue-1]){
-								pBlue;
-								SDL_Rect rct = {12*yblue,12*(xblue-1),12,12};
+							if(!maze[t][s-1]){
+								SDL_Rect rct = {12*(t),12*(s-1),12,12};
 								SDL_RenderFillRect(gRenderer,&rct);
 								WHITE;
-								rct = {12*yblue,12*xblue,12,12};
+								rct = {12*t,12*s,12,12};
+								if(pl){
+									xblue--;
+								}else{
+									xyellow--;
+								}
 								SDL_RenderFillRect(gRenderer,&rct);
-								xblue--;
 							}
 							break;
 							
 							case SDLK_DOWN:
-							if(!maze[yblue][xblue+1]){
-								pBlue;
-								SDL_Rect rct = {12*(yblue),12*(xblue+1),12,12};
+							if(!maze[t][s+1]){
+								SDL_Rect rct = {12*(t),12*(s+1),12,12};
 								SDL_RenderFillRect(gRenderer,&rct);
 								WHITE;
-								rct = {12*yblue,12*xblue,12,12};
+								rct = {12*t,12*s,12,12};
 								SDL_RenderFillRect(gRenderer,&rct);
-								xblue++;
+								if(pl){
+									xblue++;
+								}else{
+									xyellow++;
+								}
 							}
 							break;
 							
 							case SDLK_LEFT:
-							if(!maze[yblue-1][xblue]){
-								pBlue;
-								SDL_Rect rct = {12*(yblue-1),12*(xblue),12,12};
+							if(!maze[t-1][s]){
+								SDL_Rect rct = {12*(t-1),12*(s),12,12};
 								SDL_RenderFillRect(gRenderer,&rct);
 								WHITE;
-								rct = {12*yblue,12*xblue,12,12};
+								rct = {12*t,12*s,12,12};
 								SDL_RenderFillRect(gRenderer,&rct);
-								yblue--;
+								if(pl){
+									yblue--;
+								}else{
+									yyellow--;
+								}
 							}
 							break;
 							
 							case SDLK_RIGHT:
-							if(!maze[yblue+1][xblue]){
-								pBlue;
-								SDL_Rect rct = {12*(yblue+1),12*(xblue),12,12};
+							if(!maze[t+1][s]){
+								SDL_Rect rct = {12*(t+1),12*(s),12,12};
 								SDL_RenderFillRect(gRenderer,&rct);
 								WHITE;
-								rct = {12*yblue,12*xblue,12,12};
+								rct = {12*t,12*s,12,12};
 								SDL_RenderFillRect(gRenderer,&rct);
-								yblue++;
+								if(pl){
+									yblue++;
+								}else{
+									yyellow++;
+								}
 							}
 							break;
 							
@@ -209,7 +232,7 @@ int main( int argc, char* args[] )
 							break;
 						}
 						SDL_RenderPresent(gRenderer);
-											}
+					}
 				}
 			}
 		}
@@ -259,4 +282,29 @@ void maze_setup(bool** maze){
 	bblue = 1;
 	ayellow = x;
 	byellow = y;
+}
+
+bool entry(){
+	pBlue;
+	SDL_Rect rct = {0,0,SCREEN_WIDTH,SCREEN_HEIGHT};
+	SDL_RenderFillRect(gRenderer, &rct);
+	pYellow;
+	rct = {0,SCREEN_HEIGHT/2,SCREEN_WIDTH,SCREEN_HEIGHT};
+	SDL_RenderFillRect(gRenderer, &rct);
+	SDL_RenderPresent(gRenderer);
+	bool quit = false;
+	SDL_Event e;
+	int x,y;
+	bool check;
+	while(!quit){
+		while(SDL_PollEvent(&e) != 0){
+			if(e.type == SDL_MOUSEBUTTONDOWN){
+				SDL_GetMouseState(&x,&y);
+				quit = true;
+				if(y<SCREEN_HEIGHT/2){check=true;}
+				else{check=false;}
+			}
+		}
+	}
+	return check;
 }
