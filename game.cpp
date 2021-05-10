@@ -222,6 +222,7 @@ int main( int argc, char* args[] )
 								SDL_RenderFillRect(gRenderer,&rct);
 								if(bg){
 									bwin();
+									SDL_RenderPresent(gRenderer);
 									quit = true;
 									SDL_Delay(10000);
 								}else{
@@ -295,6 +296,7 @@ int main( int argc, char* args[] )
 								SDL_RenderFillRect(gRenderer,&rct);
 								if(yg){
 									ywin();
+									SDL_RenderPresent(gRenderer);
 									quit = true;
 									SDL_Delay(10000);
 								}else{
@@ -389,13 +391,13 @@ bool ycheck(int x1, int x2, int y, bool** maze){
 
 bool ccheck(int x1, int y1, int x2, int y2, int x, bool** maze){
 	if(x==1){
-		return (y1==y2) && (x1<x2) && ycheck(x1,x2,y1,maze);
-	}else if(x==2){
 		return (x1==x2) && (y1<y2) && xcheck(x1,y1,y2,maze);
+	}else if(x==2){
+		return (y1==y2) && (x1<x2) && ycheck(x1,x2,y1,maze);
 	}else if(x==3){
-		return (y1==y2) && (x1>x2) && ycheck(x2,x1,y1,maze);
-	}else if(x==4){
 		return (x1==x2) && (y1>y2) && xcheck(x1,y2,y1,maze);
+	}else if(x==4){
+		return (y1==y2) && (x1>x2) && ycheck(x2,x1,y1,maze);
 	}
 	else{return false;}
 }
