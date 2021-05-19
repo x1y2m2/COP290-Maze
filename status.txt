@@ -1,0 +1,5 @@
+This game has two modes. First Mode is Two Player-One Screen. Second Mode is Two Player-Two Screens Mode. Both the modes runs as expected.
+
+Two Player-One Screen: In this mode, the game runs on one screen. Both the players share a screen and a keyboard. This mode does not need Socket Implementation.
+
+Two Player-Two Screens: In this mode, the game runs one two separate screens, with two seperate keyboards. This mode requires Socket implementation.
