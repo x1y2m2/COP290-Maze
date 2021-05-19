@@ -4,7 +4,7 @@ This game was developed and tested on Ubuntu 20.04.
 Installations:
 
   1. Install g++:   
-      sudo apt-get install g++
+      (i)sudo apt-get install g++
 
   2. Install SDL2 library:    
       apt-add-repository universe,
