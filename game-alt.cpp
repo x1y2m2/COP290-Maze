@@ -299,6 +299,7 @@ int main( int argc, char* args[] )
 										ywin();
 										SDL_RenderPresent(gRenderer);
 										quit = true;
+										yellow_send(5);
 										SDL_Delay(10000);
 									}else{
 										pBlue;
@@ -306,9 +307,9 @@ int main( int argc, char* args[] )
 										SDL_RenderFillRect(gRenderer,&rct);
 										xblue = ablue;
 										yblue = bblue;
+										yellow_send(5);
 									}
 								}
-								yellow_send(5);
 							}
 							break;
 							
