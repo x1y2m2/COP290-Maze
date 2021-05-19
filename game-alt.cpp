@@ -14,6 +14,11 @@ int ablue, bblue, ayellow, byellow;
 
 using namespace std;
 
+bool quit = false;
+bool pll;
+bool bg = false;
+bool yg = false;
+
 bool init()
 {
 	//Initialization flag
@@ -134,11 +139,24 @@ int main( int argc, char* args[] )
 		else
 		{	
 			bool pl = entry();
-			bool** maze = setup();
+			pll = pl;
+			bool** maze;
+			if(pl){
+				maze = setup();
+				maze_send(maze);
+			}else{
+				maze = maze_receive();
+			}
 			maze_setup(maze);
+			
+			pthread_t threads[1];
+			int rc = pthread_create(&threads[0],NULL,move_recv,(void*)maze);
+			
+			int bdir = 1;
+			int ydir = 3;
 						
 			//Main loop flag
-			bool quit = false;
+			//bool quit = false;
 
 			//Event handler
 			SDL_Event e;
@@ -153,6 +171,11 @@ int main( int argc, char* args[] )
 					if( e.type == SDL_QUIT )
 					{
 						quit = true;
+						if(pl){
+							blue_send(6);
+						}else{
+							yellow_send(6);
+						}
 					}
 					else if(e.type == SDL_KEYDOWN)
 					{
@@ -176,8 +199,12 @@ int main( int argc, char* args[] )
 								rct = {12*t,12*s,12,12};
 								if(pl){
 									xblue--;
+									bdir = 4;
+									blue_send(4);
 								}else{
 									xyellow--;
+									ydir = 4;
+									yellow_send(4);
 								}
 								SDL_RenderFillRect(gRenderer,&rct);
 							}
@@ -192,8 +219,12 @@ int main( int argc, char* args[] )
 								SDL_RenderFillRect(gRenderer,&rct);
 								if(pl){
 									xblue++;
+									bdir = 2;
+									blue_send(2);
 								}else{
 									xyellow++;
+									ydir = 2;
+									yellow_send(2);
 								}
 							}
 							break;
@@ -207,8 +238,12 @@ int main( int argc, char* args[] )
 								SDL_RenderFillRect(gRenderer,&rct);
 								if(pl){
 									yblue--;
+									bdir = 3;
+									blue_send(3);
 								}else{
 									yyellow--;
+									ydir = 3;
+									yellow_send(3);
 								}
 							}
 							break;
@@ -222,19 +257,78 @@ int main( int argc, char* args[] )
 								SDL_RenderFillRect(gRenderer,&rct);
 								if(pl){
 									yblue++;
+									bdir = 1;
+									blue_send(1);
 								}else{
 									yyellow++;
+									ydir = 1;
+									yellow_send(1);
 								}
+							}
+							break;
+							
+							case SDLK_SPACE:
+							if(pl){
+								if(ccheck(xblue,yblue,xyellow,yyellow,bdir,maze)){
+									WHITE;
+									SDL_Rect rct = {12*yyellow,12*xyellow,12,12};
+									SDL_RenderFillRect(gRenderer,&rct);
+									if(bg){
+										bwin();
+										SDL_RenderPresent(gRenderer);
+										quit = true;
+										SDL_Delay(10000);
+									}else{
+										pYellow;
+										rct = {12*byellow,12*ayellow,12,12};
+										SDL_RenderFillRect(gRenderer,&rct);
+										xyellow = ayellow;
+										yyellow = byellow;
+									}
+								}
+								blue_send(5);
+							}else{
+								if(ccheck(xyellow,yyellow,xblue,yblue,ydir,maze)){
+									WHITE;
+									SDL_Rect rct = {12*yblue,12*xblue,12,12};
+									SDL_RenderFillRect(gRenderer,&rct);
+									if(yg){
+										ywin();
+										SDL_RenderPresent(gRenderer);
+										quit = true;
+										SDL_Delay(10000);
+									}else{
+										pBlue;
+										rct = {12*bblue,12*ablue,12,12};
+										SDL_RenderFillRect(gRenderer,&rct);
+										xblue = ablue;
+										yblue = bblue;
+									}
+								}
+								yellow_send(5);
 							}
 							break;
 							
 							default:
 							break;
 						}
+						if(xblue==ayellow && yblue==byellow){
+							bg = true;
+							pBlue;
+							SDL_Rect rct = {480,0,160,SCREEN_HEIGHT/2};
+							SDL_RenderFillRect(gRenderer,&rct);
+						}
+						if(xyellow==ablue && yyellow==bblue){
+							yg = true;
+							pYellow;
+							SDL_Rect rct = {480,SCREEN_HEIGHT/2,160,SCREEN_HEIGHT/2};
+							SDL_RenderFillRect(gRenderer,&rct);
+						}
 						SDL_RenderPresent(gRenderer);
 					}
 				}
 			}
+			pthread_join(threads[0],NULL);
 		}
 	}
 
@@ -307,4 +401,235 @@ bool entry(){
 		}
 	}
 	return check;
+}
+
+bool xcheck(int x, int y1, int y2, bool** maze){
+	for(int i=y1+1;i<y2;i++){
+		if(maze[i][x]){
+			return false;
+		}
+	}
+	return true;
+}
+
+bool ycheck(int x1, int x2, int y, bool** maze){
+	for(int i=x1+1;i<x2;i++){
+		if(maze[y][i]){
+			return false;
+		}
+	}
+	return true;
+}
+
+bool ccheck(int x1, int y1, int x2, int y2, int x, bool** maze){
+	if(x==1){
+		return (x1==x2) && (y1<y2) && xcheck(x1,y1,y2,maze);
+	}else if(x==2){
+		return (y1==y2) && (x1<x2) && ycheck(x1,x2,y1,maze);
+	}else if(x==3){
+		return (x1==x2) && (y1>y2) && xcheck(x1,y2,y1,maze);
+	}else if(x==4){
+		return (y1==y2) && (x1>x2) && ycheck(x2,x1,y1,maze);
+	}
+	else{return false;}
+}
+
+void bwin(){
+	SDL_Rect rct = {0,0,SCREEN_WIDTH,SCREEN_HEIGHT};
+	pBlue;
+	SDL_RenderFillRect(gRenderer,&rct);
+}
+
+void ywin(){
+	SDL_Rect rct = {0,0,SCREEN_WIDTH, SCREEN_HEIGHT};
+	pYellow;
+	SDL_RenderFillRect(gRenderer,&rct);
+}
+
+void *move_recv(void *args){
+	bool** maze;
+	maze = (bool**)args;
+	int bdir = 1;
+	int ydir = 4;
+	while(!quit){
+		if(pll){
+			int x = blue_recv();
+			switch(x){
+				case 1:
+				if(!maze[yyellow+1][xyellow]){
+					pYellow;
+					SDL_Rect rct = {12*(yyellow+1),12*(xyellow),12,12};
+					SDL_RenderFillRect(gRenderer,&rct);
+					WHITE;
+					rct = {12*yyellow,12*xyellow,12,12};
+					SDL_RenderFillRect(gRenderer,&rct);
+					yyellow++;
+				}
+				ydir = 1;
+				break;
+				
+				case 2:
+				if(!maze[yyellow][xyellow+1]){
+					pYellow;
+					SDL_Rect rct = {12*(yyellow),12*(xyellow+1),12,12};
+					SDL_RenderFillRect(gRenderer,&rct);
+					WHITE;
+					rct = {12*yyellow,12*xyellow,12,12};
+					SDL_RenderFillRect(gRenderer,&rct);
+					xyellow++;
+				}
+				ydir = 2;
+				break;
+				
+				case 3:
+				if(!maze[yyellow-1][xyellow]){
+					pYellow;
+					SDL_Rect rct = {12*(yyellow-1),12*(xyellow),12,12};
+					SDL_RenderFillRect(gRenderer,&rct);
+					WHITE;
+					rct = {12*yyellow,12*xyellow,12,12};
+					SDL_RenderFillRect(gRenderer,&rct);
+					yyellow--;
+				}
+				ydir = 3;
+				break;
+				
+				case 4:
+				if(!maze[yyellow][xyellow-1]){
+					pYellow;
+					SDL_Rect rct = {12*(yyellow),12*(xyellow-1),12,12};
+					SDL_RenderFillRect(gRenderer,&rct);
+					WHITE;
+					rct = {12*yyellow,12*xyellow,12,12};
+					SDL_RenderFillRect(gRenderer,&rct);
+					xyellow--;
+				}
+				ydir = 4;
+				break;
+				
+				case 5:
+				if(ccheck(xyellow,yyellow,xblue,yblue,ydir,maze)){
+					WHITE;
+					SDL_Rect rct = {12*yblue,12*xblue,12,12};
+					SDL_RenderFillRect(gRenderer,&rct);
+					if(yg){
+						ywin();
+						SDL_RenderPresent(gRenderer);
+						quit = true;
+						SDL_Delay(10000);
+					}else{
+						pBlue;
+						rct = {12*bblue,12*ablue,12,12};
+						SDL_RenderFillRect(gRenderer,&rct);
+						xblue = ablue;
+						yblue = bblue;
+					}
+				}
+				break;
+				
+				case 6:
+				quit = true;
+				break;
+				
+				default:
+				break;
+			}
+		}else{
+			int x = yellow_recv();
+			switch(x){
+				case 1:
+				if(!maze[yblue+1][xblue]){
+					pBlue;
+					SDL_Rect rct = {12*(yblue+1),12*(xblue),12,12};
+					SDL_RenderFillRect(gRenderer,&rct);
+					WHITE;
+					rct = {12*yblue,12*xblue,12,12};
+					SDL_RenderFillRect(gRenderer,&rct);
+					yblue++;
+				}
+				bdir = 1;
+				break;
+				
+				case 2:
+				if(!maze[yblue][xblue+1]){
+					pBlue;
+					SDL_Rect rct = {12*(yblue),12*(xblue+1),12,12};
+					SDL_RenderFillRect(gRenderer,&rct);
+					WHITE;
+					rct = {12*yblue,12*xblue,12,12};
+					SDL_RenderFillRect(gRenderer,&rct);
+					xblue++;
+				}
+				bdir = 2;
+				break;
+				
+				case 3:
+				if(!maze[yblue-1][xblue]){
+					pBlue;
+					SDL_Rect rct = {12*(yblue-1),12*(xblue),12,12};
+					SDL_RenderFillRect(gRenderer,&rct);
+					WHITE;
+					rct = {12*yblue,12*xblue,12,12};
+					SDL_RenderFillRect(gRenderer,&rct);
+					yblue--;
+				}
+				bdir = 3;
+				break;
+				
+				case 4:
+				if(!maze[yblue][xblue-1]){
+					pBlue;
+					SDL_Rect rct = {12*(yblue),12*(xblue-1),12,12};
+					SDL_RenderFillRect(gRenderer,&rct);
+					WHITE;
+					rct = {12*yblue,12*xblue,12,12};
+					SDL_RenderFillRect(gRenderer,&rct);
+					xblue--;
+				}
+				bdir = 4;
+				break;
+				
+				case 5:
+				if(ccheck(xblue,yblue,xyellow,yyellow,bdir,maze)){
+					WHITE;
+					SDL_Rect rct = {12*yyellow,12*xyellow,12,12};
+					SDL_RenderFillRect(gRenderer,&rct);
+					if(bg){
+						bwin();
+						SDL_RenderPresent(gRenderer);
+						quit = true;
+						SDL_Delay(10000);
+					}else{
+						pYellow;
+						rct = {12*byellow,12*ayellow,12,12};
+						SDL_RenderFillRect(gRenderer,&rct);
+						xyellow = ayellow;
+						yyellow = byellow;
+					}
+				}
+				break;
+				
+				case 6:
+				quit = true;
+				break;
+				
+				default:
+				break;
+			}
+		}
+		if(xblue==ayellow && yblue==byellow){
+			bg = true;
+			pBlue;
+			SDL_Rect rct = {480,0,160,SCREEN_HEIGHT/2};
+			SDL_RenderFillRect(gRenderer,&rct);
+		}
+		if(xyellow==ablue && yyellow==bblue){
+			yg = true;
+			pYellow;
+			SDL_Rect rct = {480,SCREEN_HEIGHT/2,160,SCREEN_HEIGHT/2};
+			SDL_RenderFillRect(gRenderer,&rct);
+		}
+		SDL_RenderPresent(gRenderer);
+	}
+	return NULL;
 }
