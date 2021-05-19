@@ -1,4 +1,7 @@
+#include <pthread.h>
 #include "setup.h"
+#include "blue.h"
+#include "yellow.h"
 
 //Starts up SDL and creates window
 bool init();
@@ -12,3 +15,12 @@ void maze_setup(bool** maze);
 void close();
 
 bool entry();
+
+bool xcheck(int x, int y1, int y2, bool** maze);
+bool ycheck(int x1, int x2, int y, bool** maze);
+bool ccheck(int x1, int y1, int x2, int y2, int x, bool** maze);
+
+void bwin();
+void ywin();
+
+void *move_recv(void *args);
