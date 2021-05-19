@@ -39,7 +39,7 @@ bool init()
 		}
 
 		//Create window
-		gWindow = SDL_CreateWindow( "SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
+		gWindow = SDL_CreateWindow( "Maze", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN );
 		if( gWindow == NULL )
 		{
 			printf( "Window could not be created! SDL Error: %s\n", SDL_GetError() );
@@ -140,11 +140,14 @@ int main( int argc, char* args[] )
 		{	
 			bool pl = entry();
 			pll = pl;
+			cout<<pl<<"	"<<pll<<endl;
 			bool** maze;
 			if(pl){
+				bool bbb = blue_init();
 				maze = setup();
 				maze_send(maze);
 			}else{
+				bool bbb = yellow_init();
 				maze = maze_receive();
 			}
 			maze_setup(maze);
@@ -277,6 +280,7 @@ int main( int argc, char* args[] )
 										bwin();
 										SDL_RenderPresent(gRenderer);
 										quit = true;
+										blue_send(5);
 										SDL_Delay(10000);
 									}else{
 										pYellow;
@@ -284,9 +288,9 @@ int main( int argc, char* args[] )
 										SDL_RenderFillRect(gRenderer,&rct);
 										xyellow = ayellow;
 										yyellow = byellow;
+										blue_send(5);
 									}
 								}
-								blue_send(5);
 							}else{
 								if(ccheck(xyellow,yyellow,xblue,yblue,ydir,maze)){
 									WHITE;
@@ -386,15 +390,15 @@ bool entry(){
 	rct = {0,SCREEN_HEIGHT/2,SCREEN_WIDTH,SCREEN_HEIGHT};
 	SDL_RenderFillRect(gRenderer, &rct);
 	SDL_RenderPresent(gRenderer);
-	bool quit = false;
+	bool quite = false;
 	SDL_Event e;
 	int x,y;
 	bool check;
-	while(!quit){
+	while(!quite){
 		while(SDL_PollEvent(&e) != 0){
 			if(e.type == SDL_MOUSEBUTTONDOWN){
 				SDL_GetMouseState(&x,&y);
-				quit = true;
+				quite = true;
 				if(y<SCREEN_HEIGHT/2){check=true;}
 				else{check=false;}
 			}
