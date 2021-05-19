@@ -2,21 +2,21 @@
 
 using namespace std;
 
-struct sockaddr_in address; 
-int sock = 0, valread; 
+struct sockaddr_in addressy; 
+int sock = 0, valready; 
 struct sockaddr_in serv_addr; 
-char buffer[1024] = {0};
+char buffery[1024] = {0};
 
 void yellow_send(int x){
     char* c = new char[1];
-    c[0] = (char)x;
+    c[0] = '0' + x;
     send(sock,c,1,0);
 }
 
 int yellow_recv(){
     char* c = new char[1];
-    valread = read(sock,c,1);
-    return (int)c[0];
+    valready = read(sock,c,1);
+    return c[0] - '0';
 }
 
 
@@ -54,7 +54,7 @@ bool yellow_init(){
 
 bool** maze_receive(){
     char* cc = new char[1600];
-    valread = read(sock,cc,1600);
+    valready = read(sock,cc,1600);
     bool** mz = new bool*[40];
     for(int i=0;i<40;i++){
     	mz[i] = new bool[40];
