@@ -2,22 +2,22 @@
 
 using namespace std;
 
-int server_fd, new_socket, valread; 
-struct sockaddr_in address; 
+int server_fd, new_socket, valreadb; 
+struct sockaddr_in addressb; 
 int opt = 1; 
-int addrlen = sizeof(address); 
-char buffer[1024] = {0}; 
+int addrlen = sizeof(addressb); 
+char bufferb[1024] = {0}; 
 
 void blue_send(int x){
     char* c = new char[1];
-    c[0] = (char)x;
+    c[0] = '0' + x;
     send(new_socket,c,1,0);
 }
 
 int blue_recv(){
     char* c = new char[1];
-    valread = read(new_socket,c,1);
-    return (int)c[0];
+    valreadb = read(new_socket,c,1);
+    return c[0]-'0';
 }
 
 bool blue_init(){
@@ -39,13 +39,13 @@ bool blue_init(){
         return false;
         //exit(EXIT_FAILURE); 
     } 
-    address.sin_family = AF_INET; 
-    address.sin_addr.s_addr = INADDR_ANY; 
-    address.sin_port = htons( PORT ); 
+    addressb.sin_family = AF_INET; 
+    addressb.sin_addr.s_addr = INADDR_ANY; 
+    addressb.sin_port = htons( PORT ); 
        
     // Forcefully attaching socket to the port 2021
-    if (bind(server_fd, (struct sockaddr *)&address,  
-                                 sizeof(address))<0) 
+    if (bind(server_fd, (struct sockaddr *)&addressb,  
+                                 sizeof(addressb))<0) 
     { 
         perror("bind failed"); 
         return false;
@@ -57,17 +57,13 @@ bool blue_init(){
         return false;
         //exit(EXIT_FAILURE); 
     } 
-    if ((new_socket = accept(server_fd, (struct sockaddr *)&address,  
+    if ((new_socket = accept(server_fd, (struct sockaddr *)&addressb,  
                        (socklen_t*)&addrlen))<0) 
     { 
         perror("accept"); 
         return false;
         //exit(EXIT_FAILURE); 
     } 
-    //valread = read( new_socket , buffer, 1024); 
-    //cout<<buffer<<endl; 
-    //send(new_socket , hello , strlen(hello) , 0 ); 
-    //cout<<"Hello message sent"<<endl; 
     return true;
 }
 
@@ -86,4 +82,3 @@ void maze_send(bool** maze){
     }
     send(new_socket, mz, 1600, 0);
 }
-
