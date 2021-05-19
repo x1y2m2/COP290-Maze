@@ -140,7 +140,6 @@ int main( int argc, char* args[] )
 		{	
 			bool pl = entry();
 			pll = pl;
-			cout<<pl<<"	"<<pll<<endl;
 			bool** maze;
 			if(pl){
 				bool bbb = blue_init();
